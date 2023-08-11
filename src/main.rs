@@ -44,9 +44,25 @@ impl Grid {
         live_neighboors
     }
 
-    // fn mutate_to_next_state(&mut self) {
+    fn mutate_to_next_state(&mut self) {
+        // 3 live neighboors => alive
+        // two live neighboors + alive => alive
 
-    // }
+        let mut next_state = [[false; GRID_SIZE];  GRID_SIZE];
+
+        for y in 0..GRID_SIZE {
+            for x in 0..GRID_SIZE {
+                let live_neighboors = self.count_live_neighboors(y, x);
+                match live_neighboors {
+                    3..=8 => next_state[y][x] = true,
+                    2 => next_state[y][x] = self.cells[y][x],
+                    _ => continue
+                }
+            }
+        }
+
+        self.cells = next_state;
+    }
 }
 
 
@@ -54,13 +70,14 @@ impl Grid {
 
 fn main() {
     let mut grid = Grid { cells: [[false; GRID_SIZE]; GRID_SIZE]};
-    println!("Unmodified:\n{}", grid);
     grid.randomize_cell_values();
-    println!("Modified:\n{}", grid);
-    println!("grid.cells[0][0] neighboors: {}", grid.count_live_neighboors(0, 0));
-    println!("grid.cells[1][1] neighboors: {}", grid.count_live_neighboors(1, 1));
-    println!("grid.cells[2][2] neighboors: {}", grid.count_live_neighboors(2, 2));
-
+    println!("Starting grid:\n{}", grid);
+    grid.mutate_to_next_state();
+    println!("Next state grid:\n{}", grid);
+    grid.mutate_to_next_state();
+    println!("Next state grid:\n{}", grid);
+    grid.mutate_to_next_state();
+    println!("Next state grid:\n{}", grid);
 
 
 }
