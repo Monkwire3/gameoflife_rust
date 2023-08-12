@@ -1,7 +1,7 @@
 use std::fmt;
 use rand::Rng;
 
-const GRID_SIZE: usize = 10;
+const GRID_SIZE: usize = 100;
 struct Grid {
     cells: [[bool; GRID_SIZE];  GRID_SIZE],
 }
@@ -10,7 +10,7 @@ impl fmt::Display for Grid {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.cells.iter()
             .map(|row| row.iter()
-                .map(|&val| if val { "*" } else { " " })
+                .map(|&val| if val { "\u{25A0}" } else { " " })
                 .collect::<Vec<&str>>()
                 .join(" "))
             .collect::<Vec<String>>()
@@ -44,24 +44,20 @@ impl Grid {
         live_neighboors
     }
 
-    fn mutate_to_next_state(&mut self) {
-        // 3 live neighboors => alive
-        // two live neighboors + alive => alive
-
+    fn get_next_state(&mut self) -> [[bool; GRID_SIZE]; GRID_SIZE] {
         let mut next_state = [[false; GRID_SIZE];  GRID_SIZE];
 
         for y in 0..GRID_SIZE {
             for x in 0..GRID_SIZE {
                 let live_neighboors = self.count_live_neighboors(y, x);
                 match live_neighboors {
-                    3..=8 => next_state[y][x] = true,
+                    3 => next_state[y][x] = true,
                     2 => next_state[y][x] = self.cells[y][x],
                     _ => continue
                 }
             }
         }
-
-        self.cells = next_state;
+        next_state
     }
 }
 
@@ -71,13 +67,13 @@ impl Grid {
 fn main() {
     let mut grid = Grid { cells: [[false; GRID_SIZE]; GRID_SIZE]};
     grid.randomize_cell_values();
-    println!("Starting grid:\n{}", grid);
-    grid.mutate_to_next_state();
-    println!("Next state grid:\n{}", grid);
-    grid.mutate_to_next_state();
-    println!("Next state grid:\n{}", grid);
-    grid.mutate_to_next_state();
-    println!("Next state grid:\n{}", grid);
 
 
+    for _ in 0..100 {
+        print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+        println!("{}", grid);
+        grid.cells = grid.get_next_state();
+        std::thread::sleep(std::time::Duration::from_secs(1));
+
+    }
 }
